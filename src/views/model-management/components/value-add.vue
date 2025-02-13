@@ -1,0 +1,141 @@
+<template>
+  <div>
+    <el-form label-width="10px" :model="formData" ref="formRule">
+      <el-row>
+        <el-col :span="24">
+          <el-form-item label="">
+            <div>
+              <el-button icon="el-icon-plus" circle size="mini" type="primary" @click="addGroup"></el-button>
+            </div>
+            <div>
+              <div class="flex" v-for="(item, index) in formData.valueArr">
+                <div style="margin: 36px 10px 0 0">
+                  <el-button
+                    icon="el-icon-minus"
+                    circle
+                    size="mini"
+                    type="danger"
+                    @click="minusCard(index)"
+                  ></el-button>
+                </div>
+                <div>
+                  <div>配置{{ index + 1 }}</div>
+                  <div class="gap group">
+                    <div class="flex">
+                      <div style="margin-right: 10px">阈值名称</div>
+                      <div>
+                        <div style="margin-bottom: 10px">
+                          <el-input
+                            v-model="item.name"
+                            placeholder="请输入阈值名称"
+                            clearable
+                            style="width: 300px"
+                          ></el-input>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex" style="margin-top: 5px">
+                      <div style="margin-right: 10px">阈值的值</div>
+                      <el-input
+                        v-model="item.value"
+                        placeholder="请输入阈值的值"
+                        clearable
+                        style="width: 300px"
+                      ></el-input>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
+<!--    <el-button type="primary" icon="el-icon-circle-check" @click="onSure">确定</el-button>-->
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    value: String,
+  },
+  data() {
+    return {
+      title: "阈值配置",
+      formData: {
+        valueArr: [{}], //板卡配置
+      },
+    };
+  },
+  watch: {
+    formData: {
+      handler: function () {
+        this.onSure();
+      },
+      deep: true,
+    },
+    value: {
+      handler: function (val) {
+        if (val) {
+          this.formData.valueArr = JSON.parse(val);
+        } else {
+          this.formData.valueArr = [
+            {
+              name: "",
+              value: "",
+            },
+          ];
+        }
+      },
+      immediate: true,
+    },
+  },
+  methods: {
+
+    addGroup() {
+      if (
+        !this.formData.valueArr[this.formData.valueArr.length - 1].name ||
+        !this.formData.valueArr[this.formData.valueArr.length - 1].value
+      ) {
+        return this.$message.warning(`请先补全阈值的相关配置，再添加！`);
+      } else if (this.formData.valueArr.length > 4) {
+        return this.$message.warning(`最多设置5个阈值信息！`);
+      }
+      this.formData.valueArr.push({
+        name: "",
+        value: "",
+      });
+    },
+
+    //板卡
+    minusCard(index) {
+      if (this.formData.valueArr.length == 1) {
+        return this.$message.warning("至少保留一项阈值配置！");
+      }
+      this.formData.valueArr.splice(index, 1);
+    },
+
+    minusModel(index) {
+      if (this.formData.models.length == 1) {
+        return this.$message.warning("至少选择一项关联模型！");
+      }
+      this.formData.models.splice(index, 1);
+    },
+    onSure() {
+      if (this.formData.valueArr[0].name && this.formData.valueArr[0].value) {
+        const strValue = JSON.stringify(this.formData.valueArr);
+        this.$emit("update:value", strValue);
+      }
+    },
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+.group {
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 2px dashed rgb(223, 227, 238);
+}
+</style>
